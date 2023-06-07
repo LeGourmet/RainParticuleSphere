@@ -29,7 +29,7 @@ public class Drop{
     PVector V0_cam_sq = PVector.add(V0_sq,PVector.mult(p_cameraMovement,100.f));
     PVector V0_cam    = PVector.div(V0_cam_sq,sqrt(V0_cam_sq.mag()));
     
-    _position = sampleSurfaceDropsSphere(V0_cam);
+    _position = dropsSphere.sampleSurface(V0_cam);
     _positionOld = PVector.sub(_position,PVector.mult(V0,DELTA_TIME));
     
     for(Object o : obstacles)
@@ -65,6 +65,5 @@ public class Drop{
     for(Object o : obstacles) if(o.intersect(_position,_positionOld)) _state = -1; // todo change position  
   }
   
-  private boolean outsideDropsSphere() { return (DROPS_SPHERE_RADIUS*DROPS_SPHERE_RADIUS)<PVector_distSq(_position,DROPS_SPHERE_CENTER);}
-  private boolean insideDropsSphere() { return (DROPS_SPHERE_RADIUS*DROPS_SPHERE_RADIUS)>=PVector_distSq(_position,DROPS_SPHERE_CENTER);}
+  private boolean outsideDropsSphere() { return dropsSphere.isOutside(_position);}
 }

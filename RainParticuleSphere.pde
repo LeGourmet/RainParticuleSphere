@@ -1,11 +1,10 @@
 import peasy.*;
 import java.util.Collections;
 
-float   RAIN_INTENSITY        = 0.2;     // mm/h
-float   DELTA_TIME            = 0.02;   // s
+float   RAIN_INTENSITY        = 0.2f;    // mm/h
+float   DELTA_TIME            = 0.02f;   // s
 
-float   DROPS_SPHERE_RADIUS   = 300.f;   // m
-PVector DROPS_SPHERE_CENTER   = new PVector(0.f,0.f,0.f); // unitless
+float   DROPS_SPHERE_RADIUS  = 300.f;   // m
 
 int     DROPS_NB_MAX          = 50000;  // uniteless
 float   DROPS_SIZE_MIN        = 2.f;    // mm
@@ -14,11 +13,11 @@ float   DROPS_CX              = 0.47;
 
 PVector WIND                  = new PVector(-100.f,30.f,50.f);  // m/s
 PVector GRAVITY               = new PVector(0.f,9.81f,0.f);     // m/s
-PVector CAMERA_TRANSLATION    = new PVector(0.f,0.f,0.f);
 
 PeasyCam camera;
 Drop[] drops = new Drop[DROPS_NB_MAX];
 ArrayList<Object> obstacles = new ArrayList<>();
+DropsSphere dropsSphere = new DropsSphere(new PVector(0.f,0.f,0.f), DROPS_SPHERE_RADIUS);
 
 void setup(){
   size(1200,800,P3D);
@@ -39,10 +38,6 @@ void setup(){
 
 void draw(){  
   float dropsNeed = min(getNbDropsNeeded(),DROPS_NB_MAX);
-  PVector oldCameraPos = CAMERA_TRANSLATION.copy();
-  
-  CAMERA_TRANSLATION.set(100.f*cos(0.1*frameCount),0.f,0.f);
-  DROPS_SPHERE_CENTER.add(CAMERA_TRANSLATION);
   
   /*****************************************************************************************
    *****************                        DISPLAY                        *****************
@@ -51,43 +46,35 @@ void draw(){
   lights();
   
   // ------ DISPLAY DROPS SPHERE ------
-  noFill();
-  stroke(255);
-  strokeWeight(0.1);
-  sphereDetail(36);
-  pushMatrix();
-  translate(DROPS_SPHERE_CENTER);
-  sphere(DROPS_SPHERE_RADIUS);
-  popMatrix();
+  //dropsSphere.display();
   
+  // ------ DISPLAY OBSTACLES ------
+  beginShape(TRIANGLES);
+  noStroke();
+  obstacles.forEach(o -> o.vertices());
+  endShape(CLOSE);
   
   // ------ DISPLAY DROPS ------
   stroke(0,0,255);
   for(int i=0; i<DROPS_NB_MAX ;i++) drops[i].display();
   
-  // ------ DISPLAY OBSTACLES ------
-  beginShape(TRIANGLES);
-  noStroke();
-  for(Object o : obstacles) o.vertices();
-  endShape(CLOSE);
-  
   // ------ DISPLAY HUD ------
   camera.beginHUD();
   fill(255);
-  text("Number drops : " + (int) dropsNeed, width*0.5,height*0.1,0);
+  text("Number drops : " + (int) dropsNeed, width*0.5f,height*0.1f,0.f);
   camera.endHUD();
   
   /*****************************************************************************************
    *****************                         UPDATE                        *****************
    *****************************************************************************************/
-  for(int i=0; i<dropsNeed ;i++) drops[i].recycle(PVector.sub(CAMERA_TRANSLATION,oldCameraPos));
+  for(int i=0; i<dropsNeed ;i++) drops[i].recycle(dropsSphere.getMovement());
   
   for(int i=0; i<DROPS_NB_MAX ;i++) {
     drops[i].updatePosition();
     drops[i].updateIntersection();  
   }
   
-  DROPS_SPHERE_CENTER.sub(CAMERA_TRANSLATION);
+  //dropsSphere.update();
 }
 
 void keyPressed(){
