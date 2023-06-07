@@ -2,24 +2,25 @@ public class Drop{
   private PVector _positionOld;
   private PVector _position;
   private float   _size;
-  private int     _state;
+  private int     _state;      // -1 dead   ;   1 alive   ;   0 dead but should be diplay during this frame
   
   public Drop(){
     this._positionOld = new PVector(0.f,0.f,0.f);
-    this._position = new PVector(0.f,0.f,0.f);
-    this._size = 0.f;
-    this._state = -1;
+    this._position    = new PVector(0.f,0.f,0.f);
+    this._size        = 0.f;
+    this._state       = -1;
   }
   
   public void display(){
-    if(_state < 0) return;
+    if(_state<0) return;
     if(_state==0) _state = -1;
+    
     strokeWeight(_size);
     line(_position,_positionOld);
   }
   
   public void recycle(PVector p_cameraMovement){
-    if(!(_state<0)) return;
+    if(_state==0 || _state==1) return;
     
     _state = 1;
     _size = DROPS_SIZE_MIN - max(DROPS_SIZE_MIN-DROPS_SIZE_MAX, log(random(0,1))/getLambda());
@@ -32,6 +33,7 @@ public class Drop{
     _position = dropsSphere.sampleSurface(V0_cam);
     _positionOld = PVector.sub(_position,PVector.mult(V0,DELTA_TIME));
     
+    // TODO use real Rain Shadow Map and use it for sampling
     for(Object o : obstacles)
       if(o.intersect(_position,PVector.mult(V0.normalize(),-1000.f))){
         _state = -1;
@@ -42,14 +44,14 @@ public class Drop{
   }
   
   public void updatePosition(){
-    if(_state<0) return;
+    if(_state<=0) return;
     
     PVector velOld = PVector.div(PVector.sub(_position,_positionOld),DELTA_TIME);
       
     PVector wind_directional = WIND;
     PVector wind_local = new PVector(0,0,0);
-    //PVector wind_local = PVector.mult(_position,90.*cos(sqrt(_position.mag()))/_position.mag());
-    //PVector wind_local = PVector.mult(_position.normalize(),max(10.f,100.f-_position.mag()));
+    //Vector wind_local = PVector.mult(_position,90.*cos(sqrt(_position.mag()))/_position.mag());
+    //PVector wind_local = new PVector(0.f,1.f,0.f).cross(new PVector(_position.x,0.f,_position.z)).normalize().mult(20.*sqrt(abs(_position.y+300.f))).add(new PVector(0.,100.,0.)); // tornade
     PVector wind_total = PVector.add(PVector.mult(wind_directional,wind_directional.mag()),PVector.mult(wind_local,wind_local.mag()));
       
     PVector a = PVector.add(GRAVITY,PVector.mult(PVector.sub(wind_total,PVector.mult(velOld,velOld.mag())),0.9195*DROPS_CX/_size));
@@ -61,9 +63,13 @@ public class Drop{
   }
   
   public void updateIntersection(){
-    if(outsideDropsSphere()) _state = -1;
-    for(Object o : obstacles) if(o.intersect(_position,_positionOld)) _state = -1; // todo change position  
+    for(Object o : obstacles) 
+        if(o.intersect(_position,_positionOld)) {
+          _state = -1;
+          // TODO set _position in intersection position with offset with normal 
+          return;
+        }
+        
+    if(dropsSphere.isOutside(_position)) _state = -1;
   }
-  
-  private boolean outsideDropsSphere() { return dropsSphere.isOutside(_position);}
 }

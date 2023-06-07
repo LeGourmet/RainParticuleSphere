@@ -17,9 +17,9 @@ public class DropsSphere{
     return 4.f/3.f* PI*_radius*_radius*_radius;
   }
   
-  public void update(){
+  public void update(PVector p_newPos){
     _positionOld.set(_position);
-    _position.set(100.f*cos(0.1*frameCount),0.f,0.f);
+    _position.set(p_newPos);
   }
   
   public void display(){

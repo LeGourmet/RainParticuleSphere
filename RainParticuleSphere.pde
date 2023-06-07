@@ -1,8 +1,8 @@
 import peasy.*;
 import java.util.Collections;
 
-float   RAIN_INTENSITY        = 0.2f;    // mm/h
-float   DELTA_TIME            = 0.02f;   // s
+float   RAIN_INTENSITY        = 0.2f;   // mm/h
+float   DELTA_TIME            = 0.02f;  // s
 
 float   DROPS_SPHERE_RADIUS  = 300.f;   // m
 
@@ -11,8 +11,8 @@ float   DROPS_SIZE_MIN        = 2.f;    // mm
 float   DROPS_SIZE_MAX        = 8.f;    // mm
 float   DROPS_CX              = 0.47;
 
-PVector WIND                  = new PVector(-100.f,30.f,50.f);  // m/s
-PVector GRAVITY               = new PVector(0.f,9.81f,0.f);     // m/s
+PVector WIND                  = new PVector(-50.f, 25.f,5.f);  // m/s
+PVector GRAVITY               = new PVector(  0.f,9.81f,0.f);  // m/s 
 
 PeasyCam camera;
 Drop[] drops = new Drop[DROPS_NB_MAX];
@@ -29,8 +29,8 @@ void setup(){
   camera.setMinimumDistance(0.001f);
   camera.setMaximumDistance(1000.f);
   
-  obstacles.add(new Object(new PVector(0.f,0.f,0.f),color(0,127,127),10.f,"./assets/cube.obj"));
   obstacles.add(new Object(new PVector(0.f,0.f,0.f),color(0,127,127),500.f ,"./assets/plane.obj"));
+  obstacles.add(new Object(new PVector(0.f,0.f,0.f),color(0,127,127),2.f*DROPS_SPHERE_RADIUS*0.1f ,"./assets/cube.obj"));
 
   for(int i=0; i<DROPS_NB_MAX ;i++) drops[i] = new Drop();
 }
@@ -38,6 +38,7 @@ void setup(){
 
 void draw(){  
   float dropsNeed = min(getNbDropsNeeded(),DROPS_NB_MAX);
+  //WIND = PVector.mult(new PVector(10.f,0.f,0.f),3.*cos(frameCount*0.01));
   
   /*****************************************************************************************
    *****************                        DISPLAY                        *****************
@@ -74,7 +75,7 @@ void draw(){
     drops[i].updateIntersection();  
   }
   
-  //dropsSphere.update();
+  //dropsSphere.update(new PVector(100.f*cos(0.1*frameCount),0.f,0.f));
 }
 
 void keyPressed(){
