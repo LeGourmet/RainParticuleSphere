@@ -25,7 +25,7 @@ public class DropsSphere{
   public void display(){
     noFill();
     stroke(255);
-    strokeWeight(0.1);
+    strokeWeight(1.);
     sphereDetail(36);
     pushMatrix();
     translate(_position);

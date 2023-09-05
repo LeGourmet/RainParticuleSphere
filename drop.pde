@@ -33,7 +33,6 @@ public class Drop{
     _position = dropsSphere.sampleSurface(V0_cam);
     _positionOld = PVector.sub(_position,PVector.mult(V0,DELTA_TIME));
     
-    // TODO use real Rain Shadow Map and use it for sampling
     for(Object o : obstacles)
       if(o.intersect(_position,PVector.mult(V0.normalize(),-1000.f))){
         _state = -1;
@@ -44,13 +43,13 @@ public class Drop{
   }
   
   public void updatePosition(){
-    if(_state<=0) return;
+    if(_state==0 || _state==-1) return;
     
     PVector velOld = PVector.div(PVector.sub(_position,_positionOld),DELTA_TIME);
       
     PVector wind_directional = WIND;
     PVector wind_local = new PVector(0,0,0);
-    //Vector wind_local = PVector.mult(_position,90.*cos(sqrt(_position.mag()))/_position.mag());
+    //PVector wind_local = PVector.mult(_position,90.*cos(sqrt(_position.mag()))/_position.mag());
     //PVector wind_local = new PVector(0.f,1.f,0.f).cross(new PVector(_position.x,0.f,_position.z)).normalize().mult(20.*sqrt(abs(_position.y+300.f))).add(new PVector(0.,100.,0.)); // tornade
     PVector wind_total = PVector.add(PVector.mult(wind_directional,wind_directional.mag()),PVector.mult(wind_local,wind_local.mag()));
       
@@ -66,7 +65,6 @@ public class Drop{
     for(Object o : obstacles) 
         if(o.intersect(_position,_positionOld)) {
           _state = -1;
-          // TODO set _position in intersection position with offset with normal 
           return;
         }
         
